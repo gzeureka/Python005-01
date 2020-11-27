@@ -6,14 +6,14 @@ import os
 
 
 def log_func():
-    logging.info('log_func called %s' % time.strftime('%Y-%m-%d %H:%M:%S'))
+    logging.info('log_func called {}'.format(time.strftime('%Y-%m-%d %H:%M:%S')))
 
 
 if __name__ == '__main__':
     # 创建保存日志文件的目录
-    dir = '/var/log/python-%s' % time.strftime("%Y-%m-%d")
+    dir = '/var/log/python-{}'.format(time.strftime("%Y-%m-%d"))
     os.makedirs(dir, exist_ok=True)
-    filename = '%s/week01.log' % dir
+    filename = '{}/week01.log'.format(dir)
     print('Loggin information will be written into', filename)
 
     # 设定保存日志的文件名称，日志级别
