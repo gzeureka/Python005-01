@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 import os
 import time
@@ -23,8 +24,10 @@ def daemonize(stdin='/dev/null', stdout='/dev/null', stderr='dev/null'):
     # 从父进程环境脱离
     # chdir 确保进程不占用任何目录，否则不能 umount
     os.chdir('/')
-    os.setsid()
+    # 调用 umask(0) 拥有写任何文件的权限，避免继承自父进程的 umask 被修改导致自身权限不足
     os.umask(0)
+    # setsid 调用成功后，进程成为新的会话组长和新的进程组长，并与原来的登录会话和进程组脱离
+    os.setsid()
 
     # do second fork
     try:
@@ -53,13 +56,13 @@ def daemonize(stdin='/dev/null', stdout='/dev/null', stderr='dev/null'):
 
 
 def test():
-    print('test')
     sys.stdout.write('Daemon started with pid %d\n' % os.getpgid())
-    sys.stdout.write(f'{time.ctime()}\n')
-    sys.stdout.flush()
+    while True:
+        sys.stdout.write(f'{time.ctime()}\n')
+        sys.stdout.flush()
+        time.sleep(1)
 
 
 if __name__ == '__main__':
-    print('ok')
-    daemonize('/dev/null', '/tmp/d1.log', '/dev/null')
+    daemonize('/dev/null', '/tmp/daemon1.log', '/dev/null')
     test()
