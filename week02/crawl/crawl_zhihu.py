@@ -15,14 +15,24 @@ def get_page(url):
     response = requests.get(url, headers=headers)
     selector = etree.HTML(response.text)
 
-    # //*[@id="QuestionAnswers-answers"]/div/div/div/div[2]/div/div[15]
-    # //*[@id="QuestionAnswers-answers"]/div/div/div/div[2]/div/div[1]/div/div[2]/div[1]/span
-    #QuestionAnswers-answers > div > div > div > div:nth-child(2) > div > div:nth-child(2) > div > div.RichContent.RichContent--unescapable > div.RichContent-inner > span
-    # //*[@id="QuestionAnswers-answers"]/div/div/div/div[2]/div
-    list = selector.xpath(
-        '//*[@id="QuestionAnswers-answers"]/div/div/div/div[2]/div/div')
-    print(list)
+    list = []
 
+    answers = selector.xpath(
+        '//*[@id="QuestionAnswers-answers"]/div/div/div/div[2]/div')
+    for a in answers:
+        contents = a.xpath('//*[@class="RichContent-inner"]/span')
+        for c in contents:
+            text = c.text
+            if not text is None:
+                list.append(c.text)
+    
+    return list
+
+def save_to_file(list, file_name):
+    with open(file_name, mode = 'w') as f:
+        for i in list:
+            print(i)
+            f.write(i)
 
 if __name__ == '__main__':
     # 检查命令行参数个数
@@ -31,4 +41,4 @@ if __name__ == '__main__':
     else:
         url = sys.argv[1]
 
-    get_page(url)
+    save_to_file(get_page(url), 'answer.txt')
