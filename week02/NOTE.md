@@ -41,6 +41,23 @@
 [美化异常输出](https://github.com/onelivesleft/PrettyErrors/)
 
 ## 深入了解 HTTP 协议
+### 基本概念
+    1. 传输数据和建立连接：统一资源标识符（Uniform Resource Identifiers, URI）
+    2. 消息请求 Reuest
+    3. 消息响应 Response
+    4. 状态码
+    5. HTTP 请求方法
+
+### requests 库
+使用 requests 库进行 HTTP 请求：
+    1. 发送请求
+    2. 传递 URL 参数
+    3. 定制请求头
+    4. POST 请求
+    5. 响应状态
+    6. cookie
+    7. 请求超时处理
+    8. 错误和异常处理
 
 ## 使用 XPath 匹配网页内容 & 实现翻页功能
 
