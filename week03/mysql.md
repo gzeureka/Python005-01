@@ -86,3 +86,30 @@ ON Table1.id = Table2.id;
 | table1.id | table1.name | table2.id | table2.name |
 |-|-|-|-|
 | 1 | table1_table2 | 1 | table1_table2 |
+
+LEFT JOIN
+```
+SELECT Table1.id, Table1.name, Table2.id, Table2.name
+FROM Table1
+LEFT JOIN Table2
+ON Table1.id = Table2.id;
+```
+查询结果
+| table1.id | table1.name | table2.id | table2.name |
+|-|-|-|-|
+| 1 | table1_table2 | 1 | table1_table2 |
+| 2 | table1 | NULL | NULL |
+
+RIGHT JOIN
+```
+SELECT Table1.id, Table1.name, Table2.id, Table2.name
+RIGHT Table1
+LEFT JOIN Table2
+ON Table1.id = Table2.id;
+```
+查询结果
+| table1.id | table1.name | table2.id | table2.name |
+|-|-|-|-|
+| 1 | table1_table2 | 1 | table1_table2 |
+| NULL | NULL | 3 | table2 |
+
