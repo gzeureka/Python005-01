@@ -43,6 +43,8 @@ mysql> grant all on test.* to 'test'@'%';
 - 用户 id、用户名、年龄、生日、性别、学历、字段创建时间、字段更新时间
 - 将 ORM、插入、查询语句作为作业内容提交
 
+source code: [mysql.py](https://github.com/gzeureka/Python005-01/blob/main/week03/mysql.py)
+
 
 
 
