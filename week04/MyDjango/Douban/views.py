@@ -6,7 +6,9 @@ from django.db.models import Avg
 
 def books_short(request):
     ###  从models取数据传给template  ###
-    shorts = T1.objects.all()
+    # shorts = T1.objects.all()
+    # 展示高于 3 星级（不包括 3 星级）的短评内容和它对应的星级；
+    shorts = T1.objects.filter(**{'n_star__gt': 3})
     # 评论数量
     counter = T1.objects.all().count()
 
