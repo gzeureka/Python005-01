@@ -160,6 +160,31 @@ Django 快捷函数：
 * 模型类的每个属性都相当于一个数据库的字段
 * 利用这些，Django 提供了一个自动生成访问数据库的 API
 
+常见报错
+1. `django.core.exceptions.ImproperlyConfigured: Error loading MySQLdb module: No module named 'MySQLdb'`
+解决方法：在 __init__.py 文件中添加以下代码即可
+```
+import pymysql
+pymysql.install_as_MySQLdb()
+```
+
+2. `version = Database.version_info`
+打开 `venv/lib/python3.8/site-packages/django/db/backends/mysql/base.py` 添加注释：
+```
+# if version < (1, 3, 13):
+# raise ImproperlyConfigured('mysqlclient 1.3.13 or newer is required; you have %s.' % Database.__version__)
+```
+
+3. `AttributeError: 'str' object has no attribute 'decode'`
+出现这个错误之后可以根据错误提示找到文件位置，打开 operations.py 文件，找到以下代码添加注释：
+```
+def last_executed_query(self, cursor, sql, params):
+    query = getattr(cursor, '_executed', None)
+    # if query is not None:
+    #     query = query.decode(errors='replace')
+    return query
+```
+
 ## Django 模板开发
 * 模板变量 {{ variables }}
 * 从 URL 获取模板变量 {% url 'yrlyear' 2020 %}
