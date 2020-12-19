@@ -176,7 +176,7 @@ pymysql.install_as_MySQLdb()
 ```
 
 3. `AttributeError: 'str' object has no attribute 'decode'`
-出现这个错误之后可以根据错误提示找到文件位置，打开 operations.py 文件，找到以下代码添加注释：
+出现这个错误之后可以根据错误提示找到文件位置，打开 `/venv/lib/python3.8/site-packages/django/db/backends/mysql/operations.py` 文件，找到以下代码添加注释：
 ```
 def last_executed_query(self, cursor, sql, params):
     query = getattr(cursor, '_executed', None)
