@@ -1,8 +1,10 @@
 # 使用 Django 展示豆瓣电影中某个电影的短评和星级等相关信息：
 1. 要求使用 MySQL 存储短评内容（至少 20 条）以及短评所对应的星级；
+
 https://github.com/gzeureka/Python005-01/blob/main/week04/t1.sql
 
 2. 展示高于 3 星级（不包括 3 星级）的短评内容和它对应的星级；
+
 https://github.com/gzeureka/Python005-01/blob/main/week04/MyDjango/Douban/views.py
 ```
 from django.shortcuts import render
