@@ -2,3 +2,5 @@
 week04/venv/
 
 *.pyc
+
+week05/redis_env/
