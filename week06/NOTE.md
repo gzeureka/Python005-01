@@ -184,7 +184,7 @@ class Human2(object):
 
 h1 = Human2()
 
-# 如果同时存在，执行顺序是 __getattribute__ > __get_attr__ > __dict__
+# 如果同时存在，执行顺序是 __getattribute__ > __getattr__ > __dict__
 # 输出
 # Human2:__getattribute__
 # 18
@@ -197,3 +197,140 @@ print(h1.age)
 # Err 404
 print(h1.noattr)
 ```
+
+描述器原理 & 属性描述符
+### 属性描述符 property
+实现特定协议（描述符）的类
+property 类需要实现以下方法
+* `__get__`
+* `__set__`
+* `__delete__`
+
+```python
+class Teacher:
+	def __init__(self, name):
+		self.name = name
+
+	def __get__(self):
+		return self.name
+
+	def __set__(self, value):
+		self.name = value
+
+pythonteacher = Teacher('yin')
+pythonteacher.name = 'wilson'
+print(pythonteacher.name)
+```
+
+###  Django 中的 property
+
+```python
+# site-packages/django/db/models/base.py
+
+class Model(metaclass=ModelBase):
+	def _get_pk_val(self, meta=None):
+		meta = meta or self._meta
+		return getattr(self, meta.pk.attname)
+
+	def _set_pk_val(self, value):
+		return setattr(self, self._meta.ok.attname, value)
+
+	pk = property(_gt_pk_val, _set_pk_val)
+```
+
+### __getattribute__ 的底层原理是描述器
+
+```python
+class Desc(object):
+	'''
+	通过打印来展示描述器的访问流程
+	'''
+
+	def __init__(self, name):
+		self.name = name
+
+	def __get__(self, instance, owner):
+		print(f'__get__{instance} {owner}')
+		return self.name
+
+	def __set__(self, isntanc, value):
+		print(f'__set__{instance} {value)')
+		self.name = value
+
+	def __delete__(self, instance):
+		print(f'__delete__{instance}')
+		del self.name
+
+class MyObj(object):
+	a = Desc('aaa')
+	b = Desc('bbb')
+
+my_object = MyObj()
+print(my_object.a)
+
+my_object.a = 456
+print(my_object.a)
+```
+
+### property 用作装饰器
+
+```python
+class Human(object):
+	def __init__(self, name):
+		self.name = name
+
+	# 将方法封装成属性
+	@property
+	def gender(self):
+		return 'M'
+
+h1 = Human('Adam')
+h2 = Human('Eve')
+h1.gender
+
+# AttributeError
+h2.gender = 'F'
+```
+
+```python
+class Human2(object):
+	def __init__(self):
+		self._gender = None
+
+	# 将方法封装成属性
+	@property
+	def gender2(self):
+		print(self._gender)
+
+	# 支持修改
+	@gender2.setter
+	def gender(self, value):
+		self._gender = value
+
+	# 支持删除
+	@gender2.deleter
+	def gender2(self):
+		del self._gender
+
+h = Human2()
+h.gender = 'F'
+h.gender
+del h.gender
+```
+
+**另一种 property 写法**
+```python
+gender = property(get_, set_, del_, ‘other property’)
+```
+
+**建议**
+* 被装饰函数建议使用相同的 `gender2`
+* 使用 setter 并不能真正意义上实现无法写入， `gender` 被改名为 `_Article__gender`
+
+property 本质并不是函数，而是特殊类（实现了数据描述符的类），如果一个对象同时定义了 `__get__()`  和  `__set()__` 方法，则成为**数据描述符**，如果仅定义了 `__get()__` 方法（例如 `__getattribute__`），则称为**非数据描述符**。
+
+property 的优点：
+* 代码更简洁，可读性、可维护性更强
+* 更好的管理属性的访问
+* 控制属性访问权限，提高数据安全性
+
