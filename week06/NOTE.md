@@ -489,3 +489,152 @@ inst = Klass()
 inst.A()
 ```
 
+## SOLID 设计原则与设计模式 & 单例模式
+### SOLID 设计原则
+* 单一责任原则 The Single Responsibility Principle
+* 开放封闭原则 The Open Closed Principle
+* 里氏替换原则 The Liskov Substitution Principle
+* 依赖倒置原则 The Dependency Inversion Principle
+* 接口分离原则 The Interface Segregation Principle
+
+### 设计模式
+* 设计模式用于解决普遍性问题
+* 设计模式保证结构的完整性
+
+### 单例模式
+1. 对象只存在一个实例
+2. __init__ 和 __new__ 的区别：
+	* __new__ 是实例创建之前被调用，返回该实例对象，是静态方法
+	* __init__ 是实例对象创建完成后被调用，是实例方法
+	* __new__ 先被调用，__init__ 后被调用
+	* __new__ 的返回值（实例）将传递给 __init__ 方法的第一个参数，__init__ 给这个 实例设置相关参数
+
+### 装饰器实现单例模式
+```python
+def singleton(cls):
+	instances = {}
+
+	def getinstance():
+		if cls not in instances:
+			instances[cls] =  cls()
+			return instances[cls]
+
+	return getinstance
+
+@singleton
+class MyClass:
+	pass
+
+m1 = MyClass()
+m2 = MyClass()
+# m1, m2 的 id 相同
+print(id(m1))
+print(id(m2))
+```
+
+### __new__ 实现单例模式
+`__new__` 和 `__init__` 的关系
+```python
+class Foo(object):
+	def __new__(cls, name):
+		print('trace __new__')
+		return super().__new__(cls)
+
+	def __init__(self, name):
+		print('trace __init__')
+		super().__init__()
+		self.name = name
+
+# 输出：
+# trace __new__
+# trace __init__
+bar = Foo('test')
+
+# 输出：
+# 'test'
+bar.name
+
+# 相当于执行下面的操作
+bar = Foo.__new__(Foo, 'test')
+if isinstance(bar, Foo):
+	Foo.__init__(bar, 'test')
+
+```
+
+`__new__` 方式实现单例模式
+```python
+class Singleton2(object):
+	__ininstance = False # 默认没有被实例化
+	def __new__(cls, *args, **kwargs):
+		if cls.__isinstance:
+			return cls.isinstance # 返回实例化对象
+		cls.__isinstance = object.__new__(cls) # 实例化
+		return cls.__isinstance
+```
+
+object 定义了一个名为 Singleton 的单例，它满足单例的 3 个需求
+1. 只能有一个实例
+2. 它必须自行创建这个实例
+3. 它必须自行向整个系统提供这个实例
+```python
+# 方法1，实现 __new__ 方法
+# 并在将一个类的实例绑定到类变量 _instance 上，
+# 如果 cls._instance 为 None，说明该类还没有实例化，实例化该类并返回
+# 如果 cls._instance 不为 None，直接返回 cls._instance
+class Singleton(object):
+	_instance = None
+
+	def __new__(cls, args, **kwargs):
+		if not cls._instance:
+			cls._instance = super(Singleton, cls).__new__(cls, *args, **kwargs)
+		return cls._instance
+
+if __name__ == '__main__':
+	s1 = Singleton()
+	s2 = Singleton()
+	assert id(s1) == id(s2)
+```
+
+以上单例模式只能用于单线程环境，多线程需要进行加锁
+```python
+import threading
+
+class Singleton(object):
+	objs = {}
+	objs_locker = threading.Lock()
+
+	def __new__(cls, *args, **kwargs):
+		if cls in cls.objs:
+			return cls.objs[cls]
+		cls.objs_locker.acquire()
+		try:
+			if cls in cls.objs: ## double check locking
+				return cls.objs[cls]
+			cls.objs[cls] = object.__new__(cls)
+		finally:
+			cls.objs_locker.release()
+```
+
+上例利用双检查锁机制，确保了在并发环境下 Singleton 的正确实现，但这个方案还有以下两个问题：
+1. 如果 Singleton 的子类重载了 `__new__()` 方法，会覆盖或者干扰 Singleton 类中 `__new__()` 的执行
+2. 如果子类有 `__init__()` 方法，那么每次实例化该 Singleton 的时候 `__init__()` 都会被调用，这是**不应该**的，`__init__()` 只应该在创建实例的时候被调用一次
+
+这两个问题当然可以解决，比如通过文档告知其他程序员，子类化  Singleton 的时候，请务必记得调用父类的 `__new__()` 方法；而第二个问题也可以通过替换掉 `__init__()` 方法来确保它只被调用一次。但是，为了实现一个单例，做大量的、水面下的工作让人感觉相当不 Pythonic。这也引起了 Python 社区的反思，有人开始重新审视 Python 的语法元素，发现模块采用的其实是天然的单例实现方式：
+	* 所有的变量都会绑定到模块
+	* 模块只初始化一次
+	* import 机制是线程安全的
+```python
+# World.py
+import Sun
+
+def run():
+	while True:
+		Sun.rise()
+		Sun.set()
+
+# main.py
+
+import World
+World.run()
+```
+
