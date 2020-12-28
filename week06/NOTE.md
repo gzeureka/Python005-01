@@ -743,3 +743,112 @@ for k,v in d.items():
 	print(k,v)
 ```
 
+## mixin 模式
+### 抽象基类
+抽象基类（abstract base class，ABC）用来确保派生类实现了基类中的特定方法。
+使用抽象基类的好处：
+* 避免继承错误，使类层次易于理解和维护
+* 无法实例化基类
+* 如果忘记在其中一个子类中实现接口方法，会尽早报错。
+
+```python
+from abc import ABC
+
+class MyABC(ABC):
+	pass
+
+MyABC.register(tuple)
+
+assert issubclass(tuple, MyABC)
+assert ininstance((), MyABC)
+```
+
+```python
+from abc import ABCMeta, abstractmethod
+
+class Base(metaclass=ABCMeta):
+	@abstractmethod
+	def foo(self):
+		pass
+
+	@abstrctmethod
+	def bar(self):
+		pass
+
+class Concrete(Base):
+	def foo(self):
+		pass
+
+c = Concrete() # TypeError
+```
+
+### mixin 模式
+在程序运行过程中，重定义类的继承，即动态继承。好处：
+* 可以在不修改已有类源代码的情况下，对已有类进行扩展
+* 进行组件的划分
+
+```python
+def mixin(Klass, MixinKlass):
+	Klass.__bases__ = (MixinKlass,) + Klass.__bases__
+
+class Fclass(object):
+	def text(self):
+		print('in FatherClass')
+
+class S1class(Fclass):
+	pass
+
+class MixinClass(object):
+	def text(self):
+		# 这里会找被调用对象所属类的父类
+		# return super().text()
+		print('in MixinClass')
+
+class S2class(S1class, MixinClass):
+	pass
+
+# test1 : S1class MRO : [<class '__main__.S1class'>, <class '__main__.Fclass'>, <class 'object'>]
+print(f' test1 :S1class MRO : {S1class.mro()}')
+s1 = S1class()
+s1.text()
+
+mixin(S1class, MixinClass)
+# test2 : S1class MRO : [<class '__main__.S1class'>, <class '__main__.MixinClass'>, <class '__main__.Fclass'>, <class 'object'>]
+print(f' test2 : S1class MRO : {S1class.mro()}')
+s1 = S1class()
+s1.text()
+
+# test3 : S2class MRO: [<class '__main__.S2class'>, <class '__main__.S1class'>, <class '__main__.MixinClass'>, <class '__main__.Fclass'>, <class 'object'>]
+print(f' test3 : S2class MRO : {S2class.mro()}')
+s2 = S2class ()
+s2.text()
+```
+
+```python
+# 《Python GUI Programming with Tkinter》
+# Mixin 类无法单独使用，必须和其他类混合使用，来加强其他类
+
+class Displayer():
+	def display(self, message):
+		print(message)
+
+class LoggerMixin():
+	def log(self, message, filename='logfile.txt'):
+		with open(filename, 'a') as fh:
+			fh.write(message)
+
+	def display(self, message):
+		# Displayer.display
+		super(LoggerMixin, self).display(message)
+		self.log(message)
+
+class MySubClass(LoggerMixin, Displayer):
+	def log(self, message):
+		super().log(message, filename='subclasslog.txt')
+
+subclass = MySubClass()
+subclass.display('This string will be shown and logged in subclasslog.txt')
+
+# [<class '__main__.MySubClass'>, <class '__main__.loggerMixin'>, <class '__main__.Displayer'>, <class 'object'>]
+print(MySubClass.mro())
+```
