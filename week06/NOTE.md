@@ -692,3 +692,54 @@ foo = Foo()
 foo.say_foo()
 ```
 
+## 元类
+* 元类是关于类的类，是类的模板。
+* 元类是用来控制如何创建类的，正如类是创建对象的模板一样。
+* 元类的实例为类，正如类的实例为对象
+* 创建元类的两种方法
+	1. type
+		* type（类名，父类的元组（根据继承的需要，可以为空），包含属性的字典（名字和值））
+	2. class
+
+```python
+# 使用 type 元类创建类
+def hi():
+	print('Hi metaclass')
+
+# type 的三个参数：类名，父类的元组，类的成员
+Foo = type('Foo', (), {'say_hi':hi})
+foo = Foo
+foo.say_hi()
+
+# 元类 type 首先是一个类，所以比类工厂的方法更灵活多变，可以自由创建子类来扩展元类的能力
+```
+
+```python
+def pop_value(self, dict_value):
+	for key in self.keys():
+		if self.__getitem__(key) == dict_value:
+			self.pop(key)
+			break
+
+# 元类要求，必须继承自 type
+class DelValue(type):
+	# 元类要求，必须实现 __new__ 方法
+
+	def __new__(cls, name, bases, attrs):
+		attrs['pop_value'] = pop_value
+		return type.__new__(cls, name, bases, attrs)
+
+class DelDictValue(dict, metaclass=DelValue):
+	# python2 的用法，在 python3 不支持
+	# __metaclass__ = DelValue
+	pass
+
+d = DelDictValue()
+d['a'] = 'A'
+d['b'] = 'B'
+d['c'] = 'C'
+d.pop_value('C')
+for k,v in d.items():
+	print(k,v)
+```
+
