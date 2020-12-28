@@ -334,3 +334,158 @@ property 的优点：
 * 更好的管理属性的访问
 * 控制属性访问权限，提高数据安全性
 
+## 面向对象编程 —— 继承
+### 特性
+#### 封装
+• 将内容封装到某处
+• 从某处调用被封装的内容
+
+#### 继承
+• 基本继承
+• 多重继承
+
+#### 重载
+• Python 无法在语法层面实现数据类型重载，需要在代码逻辑上实现
+• Python 可以实现参数个数重载
+
+#### 多态
+• Pyhon 不支持 Java 和 C# 这一类强类型语言中多态的写法，
+• Python 使用“鸭子类型”
+
+### 新式类
+#### 新式类和经典类的区别
+当前类或者父类继承了 object 类，那么该类便是新式类，否则便是经典类
+
+#### object 和 type 的关系
+• object 和 type 都属于 type 类 (class 'type')
+• type 类由 type **元类**自身创建的。object 类是由元类 type 创建
+• object 的父类为空，没有继承任何类
+• type 的父类为 object 类 (class 'object')
+
+### 类的继承
+* 单一继承
+• 多重继承
+• 菱形继承（钻石继承）
+• 继承机制 MRO
+• MRO 的 C3 算法
+
+```python
+# 父类
+class People(object):
+    def __init__(self):
+        self.gene = 'XY'
+    def walk(self):
+        print('I can walk')
+
+# 子类
+class Man(People):
+    def __init__(self,name):
+        self.name = name
+    def work(self):
+        print('work hard')
+
+class Woman(People):
+    def __init__(self,name):
+        self.name = name    
+    def shopping(self):
+        print('buy buy buy')
+
+p1 = Man('Adam')
+p2 = Woman('Eve')
+
+# 问题1 gene有没有被继承？
+# 没有，子类的 __init__ 覆盖了父类的 __init__
+p1.gene
+
+# 问题2 People的父类是谁？
+# object
+
+# 问题3 能否实现多重层级继承
+# 能
+
+# 问题4 能否实现多个父类同时继承
+# 能
+
+```
+
+Man 继承父类 People 的 `gene`
+```python
+class Man(People):
+	def __init__(self, name):
+		# 找到 Man 的父类 People，把 People 的对象转换为类 Man 的对象
+		super().__init__(name)
+
+	def work(self):
+		print('work hard')
+```
+
+```python
+>>> print('object', object.__class__, object.__bases__)
+object <class 'type'> ()
+
+>>> print('type', type.__class__, type.__bases__)
+type <class 'type'> (<class 'object'>,)
+```
+
+多重继承
+```python
+class Son(Man, Woman):
+	pass
+```
+
+继承顺序
+```python
+# 钻石继承
+class BaseClass(object):
+    num_base_calls = 0
+    def call_me(self):
+        print ("Calling method on Base Class")
+        self.num_base_calls += 1
+
+class LeftSubclass(BaseClass):
+    num_left_calls = 0
+    def call_me(self):
+        print ("Calling method on Left Subclass")
+        self.num_left_calls += 1
+
+class RightSubclass(BaseClass):
+    num_right_calls = 0
+    def call_me(self):
+        print("Calling method on Right Subclass")
+        self.num_right_calls += 1
+
+class Subclass(LeftSubclass,RightSubclass):
+    pass
+
+a = Subclass()
+# Calling method on Left Subclass
+a.call_me()
+
+# MRO Method Resolution Order
+print(Subclass.mro())
+# 经典类使用深度优先，新式类使用广度优先
+# 广度优先， 另外Python3 中不加(object)也是新式类，但是为了代码不会误运行在python2下产生意外结果，仍然建议增加
+# >>> Subclass.mro()
+# [<class '__main__.Subclass'>, <class '__main__.LeftSubclass'>, <class '__main__.RightSubclass'>, <class '__main__.BaseClass'>, <class 'object'>]
+
+#  修改RightSubclass 的 父类为 Object
+# >>> Subclass.mro()
+# [<class '__main__.Subclass'>, <class '__main__.LeftSubclass'>, <class '__main__.BaseClass'>, <class '__main__.RightSubclass'>, <class 'object'>]
+
+```
+
+没有实现重载
+```python
+class  Klass(object):
+    def A(self):
+        pass
+    def A(self,a, b):
+        print(f'{a},{b}')
+
+
+inst = Klass()
+# 没有实现重载
+# TypeError: A() missing 2 required positional arguments: 'a' and 'b'
+inst.A()
+```
+
