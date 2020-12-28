@@ -74,13 +74,13 @@ class Foo:
 ## 描述器高级应用 __getattribute__
 ### 属性的处理
 在类中，需要对**实例**获取属性这一行为进行操作，可以使用：
-• `__getattribute__()`
-• `__getattr__()`
+* `__getattribute__()`
+* `__getattr__()`
 
 异同：
-• 都可以对实例属性进行获取拦截
-• `__getattr__()`  适用于未定义的属性
-• `__getattribute__() ` 对所有属性的访问都会调用该方法
+* 都可以对实例属性进行获取拦截
+* `__getattr__()`  适用于未定义的属性
+* `__getattribute__() ` 对所有属性的访问都会调用该方法
 
 ```python
 class Human2(object):
@@ -337,37 +337,37 @@ property 的优点：
 ## 面向对象编程 —— 继承
 ### 特性
 #### 封装
-• 将内容封装到某处
-• 从某处调用被封装的内容
+* 将内容封装到某处
+* 从某处调用被封装的内容
 
 #### 继承
-• 基本继承
-• 多重继承
+* 基本继承
+* 多重继承
 
 #### 重载
-• Python 无法在语法层面实现数据类型重载，需要在代码逻辑上实现
-• Python 可以实现参数个数重载
+* Python 无法在语法层面实现数据类型重载，需要在代码逻辑上实现
+* Python 可以实现参数个数重载
 
 #### 多态
-• Pyhon 不支持 Java 和 C# 这一类强类型语言中多态的写法，
-• Python 使用“鸭子类型”
+* Pyhon 不支持 Java 和 C# 这一类强类型语言中多态的写法，
+* Python 使用“鸭子类型”
 
 ### 新式类
 #### 新式类和经典类的区别
 当前类或者父类继承了 object 类，那么该类便是新式类，否则便是经典类
 
 #### object 和 type 的关系
-• object 和 type 都属于 type 类 (class 'type')
-• type 类由 type **元类**自身创建的。object 类是由元类 type 创建
-• object 的父类为空，没有继承任何类
-• type 的父类为 object 类 (class 'object')
+* object 和 type 都属于 type 类 (class 'type')
+* type 类由 type **元类**自身创建的。object 类是由元类 type 创建
+* object 的父类为空，没有继承任何类
+* type 的父类为 object 类 (class 'object')
 
 ### 类的继承
 * 单一继承
-• 多重继承
-• 菱形继承（钻石继承）
-• 继承机制 MRO
-• MRO 的 C3 算法
+* 多重继承
+* 菱形继承（钻石继承）
+* 继承机制 MRO
+* MRO 的 C3 算法
 
 ```python
 # 父类
