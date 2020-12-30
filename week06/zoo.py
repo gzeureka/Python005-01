@@ -23,7 +23,7 @@
 from abc import ABC
 
 
-def Zoo(object):
+class Zoo(object):
     def __init__(self, name):
         self.name = name
         self.animals = []
@@ -36,16 +36,22 @@ def Zoo(object):
         # 添加动物
         self.animals.append(animal)
 
-    def has_animal(self, type_name):
-        canonical_type_name = f'__main__.{type_name}'
+    # 动物园里是否有某种类型的动物
+    def has_animal_of_type(self, type_name):
         for a in self.animals:
-            if canonical_type_name == type(a):
+            if type_name == type(a).__name__:
                 return True
         return False
 
+
+def hasattr(zoo, type_name):
+    return zoo.has_animal_of_type(type_name)
+
+
+# diet '食草'，'食肉'，'杂食'
 # body_type '小'，'中'，'大'
 # character '性格'，'温顺'，'凶猛'
-def Animal(ABC):
+class Animal(ABC):
     def __init__(self, diet, body_type, character):
         self.diet = diet
         self.body_type = body_type
@@ -54,25 +60,42 @@ def Animal(ABC):
     # 是否凶猛动物
     @property
     def is_fierce(self):
-        self.body_type in [
-            '中', '大'] and self.diet == '肉食' and self.character == '凶猛'
+        return self.body_type in ['中', '大'] and self.diet == '食肉' and self.character == '凶猛'
 
 
-def Cat(Animal):
+class Cat(Animal):
     voice = 'Meow'
 
-    def __init(self, name, diet, body_type, character):
-        super().__init__(self, diet, body_type, character)
+    def __init__(self, name, diet, body_type, character):
+        super().__init__(diet, body_type, character)
         self.name = name
 
 
-def Dog(Animal):
+class Dog(Animal):
     voice = 'Woof'
 
-    def __init(self, name, diet, body_type, character):
-        super().__init__(self, diet, body_type, character)
+    def __init__(self, name, diet, body_type, character):
+        super().__init__(diet, body_type, character)
         self.name = name
 
 
 if __name__ == '__main__':
-    pass
+    # 实例化动物园
+    z = Zoo('时间动物园')
+    # 动物园是否有猫这种动物
+    print('动物园是否有猫这种动物', hasattr(z, 'Cat'))
+    # 实例化一只猫，属性包括名字、类型、体型、性格
+    cat1 = Cat('大花猫 1', '食肉', '小', '温顺')
+    # 增加一只猫到动物园
+    z.add_animal(cat1)
+    print(z.animals)
+    # 增加一只到动物园
+    dog1 = Dog('大黄狗 1', '食肉', '中', '凶猛')
+    z.add_animal(dog1)
+    print(z.animals)
+    # 同一只猫不会被重复添加
+    z.add_animal(cat1)
+    print(z.animals)
+    # 动物园是否有猫这种动物 True
+    print('动物园是否有猫这种动物？', hasattr(z, 'Cat'))
+
