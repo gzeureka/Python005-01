@@ -752,3 +752,197 @@ if __name__ == '__main__':
 # [set: label Spam]
 # [get: display]
 ```
+
+## 对象协议与鸭子类型
+### 容器类型协议
+* `__str__` 打印对象是， 默认输出该方法的返回值
+* `__getitem__`、`__setitem__`、`__delitem__` 字典索引操作
+* `__iter__` 迭代器
+* `__call__` 可调用对象协议
+
+### 比较大小的协议
+* `__eq__`
+* `__gt__`
+
+### 描述符协议和属性交互协议
+* `__get__`
+* `__set__`
+
+### 可哈希对象
+* `__hash__`
+
+### 上下文管理器
+with 上下文表达式使用 `__enter__`、`__exit__` 实现上下文管理器
+
+## yield 语句
+### 生成器
+1. 在函数值使用 `yield` 关键字，可以实现**生成器**
+2. 生成器可以让函数返回可迭代对象
+3. `yield` 和 `return` 不同，`return` 返回后，函数状态终止；`yield` 保持函数的执行状态，再次返回函数后，函数回到之前保持的状态继续执行。
+4. 函数被 `yield` 会暂停，局部变量也会被保存
+5. 迭代器终止时，会抛出 `StopIteration` 异常
+
+`print([i for i in range(0, 11)])`  列表推导式产生列表
+替换为
+`print((i for i in range(0, 11)))` 生成器
+
+```python
+
+alist = [1, 2, 3, 4, 5]
+hasattr( alist, '__iter__' )  # True       
+hasattr( alist, '__next__' )  # False
+
+for i in  alist:
+    print(i)
+
+# 结论一  列表是可迭代对象，或称作可迭代（iterable）,
+#         不是迭代器（iterator）
+
+# __iter__方法是 iter() 函数所对应的魔法方法，
+# __next__方法是 next() 函数所对应的魔法方法
+
+###########################
+
+g = ( i for i in range(5))
+g  #<generator object>
+
+hasattr( g, '__iter__' )  # True    
+hasattr( g, '__next__' )  # True
+
+g.__next__()
+next(g)
+for i in g:
+    print(i)
+
+# 结论二 生成器实现完整的迭代器协议
+
+##############################
+# 类实现完整的迭代器协议
+
+class SampleIterator:
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        # Not The End
+        if ...:
+            return ...
+        # Reach The End
+        else:
+            raise StopIteration
+
+# 函数实现完整的迭代器协议
+def SampleGenerator():
+    yield ...
+    yield ...
+    yield ...  # yield语句
+# 只要一个函数的定义中出现了 yield 关键词，则此函数将不再是一个函数，
+# 而成为一个“生成器构造函数”，调用此构造函数即可产生一个生成器对象。
+
+###################
+# check iter
+def check_iterator(obj):
+    if hasattr( obj, '__iter__' ):  
+        if hasattr( obj, '__next__' ):
+            print(f'{obj} is a iterator') # 完整迭代器协议
+        else:
+            print(f'{obj} is a iterable') # 可迭代对象
+    else:
+        print(f'{obj} can not iterable') # 不可迭代
+
+def func1():
+    yield range(5)
+
+# can not iterable 不可迭代
+check_iterator(func1)
+
+# is a iterator 完整迭代器对象
+check_iterator(func1())
+
+# 结论三： 有yield的函数是迭代器，执行yield语句之后才变成生成器构造函数
+
+```
+
+* `Iterables`：包含 `__getitem__()` 或 `__iter__()` 方法的容器对象
+* `Iterator`：包含 `next()` 和 `__iter__()` 方法
+* `Generator`：包含 `yield` 语句的函数
+
+## 迭代器使用的注意事项
+* 字典进行插入操作后，字典迭代器会立即失效
+* 尾插入操作不会损坏指向当前元素的List迭代器，列表会自动变长
+* 迭代器一旦耗尽，永久损坏
+
+## yield 表达式
+用 `send` 向 `yield`  传递参数
+```python
+
+def jumping_range(up_to):
+    index = 0
+    while index < up_to:
+        jump = yield index
+        print(f'jump is {jump}')
+        if jump is None:
+            jump = 1   # next() 或者 send(None)
+        index += jump 
+        print(f'index is {index}')
+
+if __name__ == '__main__':
+    iterator = jumping_range(5)
+    # 0
+    print(next(iterator))
+
+    # jump is 2
+    # index is 2
+    # 2
+    print(iterator.send(2))
+
+    # jump is None
+    # index is 3
+    # 3
+    print(next(iterator))
+
+    # jump is -1
+    # index is 2
+    # 2
+    print(iterator.send(-1)) # 2
+
+    # jump is None
+    # index is 3
+    # 3
+    # jump is None
+    # index is 4
+    # 4
+    # jump is None
+    # index is 4
+    # 4
+    for x in iterator:
+        print(x) # 3,         
+```
+
+## 协程简介
+* 协程是一步的，线程是同步的
+* 协程是非抢占式的，线程是抢占式的
+* 线程是被动调度的，协程是主动调度的
+* 协程可以暂停函数的执行，保留上一次调用时的状态，是增强型生成器
+* 协程是用户级的任务调度，线程是内核级的任务调度
+* 协程适用于 IO 密集型程序，不适用于 CPU 密集型程序的处理
+
+### 异步编程
+Python 3.5 引入了 `await` 取代 `yield from`
+
+```python
+import asyncio
+
+async def py35_coro():
+	await stuff()
+```
+
+**注意**：await 接收的对象必须是 awaitable 对象
+awaitable 对象定义了 `__await__()` 方法
+
+awaitable 对象有三类：
+	1. 协程 coroutine
+	2. 任务对象 Task
+	3. 未来对象 Future
+
+
